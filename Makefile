@@ -10,7 +10,7 @@ lint:
 	ruff check src tests
 
 typecheck:
-	mypy src
+	mypy src --no-sqlite-cache --cache-dir outputs/mypy_cache
 
 run-scenarios:
 	python -m langgraph_agent_lab.cli run-scenarios --config configs/lab.yaml --output outputs/metrics.json

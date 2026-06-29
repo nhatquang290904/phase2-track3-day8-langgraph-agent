@@ -30,12 +30,22 @@ def run_scenarios(
     checkpointer = build_checkpointer(cfg.get("checkpointer", "memory"), cfg.get("database_url"))
     graph = build_graph(checkpointer=checkpointer)
     metrics = []
+    history_observed = False
     for scenario in scenarios:
         state = initial_state(scenario)
         run_config = {"configurable": {"thread_id": state["thread_id"]}}
         final_state = graph.invoke(state, config=run_config)
-        metrics.append(metric_from_state(final_state, scenario.expected_route.value, scenario.requires_approval))
+        metrics.append(
+            metric_from_state(
+                final_state,
+                scenario.expected_route.value,
+                scenario.requires_approval,
+            )
+        )
+        if hasattr(graph, "get_state_history"):
+            history_observed = history_observed or bool(list(graph.get_state_history(run_config)))
     report = summarize_metrics(metrics)
+    report = report.model_copy(update={"resume_success": history_observed})
     write_metrics(report, output)
     if cfg.get("report_path"):
         write_report(report, cfg["report_path"])

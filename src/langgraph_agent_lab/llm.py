@@ -1,7 +1,7 @@
 """LLM factory helper.
 
 Provides a simple interface to create LLM clients for use in nodes.
-Students should use this helper so the lab works with any supported provider.
+This project is configured to use Gemini for every LLM call.
 
 Usage in nodes:
     from .llm import get_llm
@@ -12,18 +12,29 @@ Usage in nodes:
 from __future__ import annotations
 
 import os
+from pathlib import Path
+from typing import Any
 
 
-def get_llm(model: str | None = None, temperature: float = 0.0):
-    """Create an LLM client from environment configuration.
+def load_env_file() -> None:
+    """Load .env values without overriding real environment variables."""
+    current = Path.cwd()
+    for directory in (current, *current.parents):
+        env_path = directory / ".env"
+        if not env_path.exists():
+            continue
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+        return
 
-    Checks for API keys in this order:
-    1. GEMINI_API_KEY → ChatGoogleGenerativeAI
-    2. OPENAI_API_KEY → ChatOpenAI
-    3. ANTHROPIC_API_KEY → ChatAnthropic
 
-    Override model with the `model` parameter or LLM_MODEL env var.
-    """
+def get_llm(model: str | None = None, temperature: float = 0.0) -> Any:
+    """Create a Gemini chat model from environment configuration."""
+    load_env_file()
     if os.getenv("GEMINI_API_KEY"):
         try:
             from langchain_google_genai import ChatGoogleGenerativeAI
@@ -35,27 +46,6 @@ def get_llm(model: str | None = None, temperature: float = 0.0):
             temperature=temperature,
         )
 
-    if os.getenv("OPENAI_API_KEY"):
-        try:
-            from langchain_openai import ChatOpenAI
-        except ImportError as exc:
-            raise RuntimeError("Install: pip install langchain-openai") from exc
-        return ChatOpenAI(
-            model=model or os.getenv("LLM_MODEL", "gpt-4o-mini"),
-            temperature=temperature,
-        )
-
-    if os.getenv("ANTHROPIC_API_KEY"):
-        try:
-            from langchain_anthropic import ChatAnthropic
-        except ImportError as exc:
-            raise RuntimeError("Install: pip install langchain-anthropic") from exc
-        return ChatAnthropic(
-            model=model or os.getenv("LLM_MODEL", "claude-sonnet-4-20250514"),
-            temperature=temperature,
-        )
-
     raise RuntimeError(
-        "No LLM API key found. Set GEMINI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env\n"
-        "See .env.example for configuration."
+        "No Gemini API key found. Set GEMINI_API_KEY in .env"
     )

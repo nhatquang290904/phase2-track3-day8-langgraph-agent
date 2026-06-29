@@ -41,14 +41,12 @@ This lab requires real LLM API calls in specific nodes:
 A helper is provided in `src/langgraph_agent_lab/llm.py` — it reads your API key from `.env` and returns a LangChain chat model.
 
 ```bash
-# Install your preferred LLM provider
-pip install langchain-openai    # for OpenAI
-# OR
-pip install langchain-anthropic  # for Anthropic
+# Gemini support is included in project dependencies
+pip install -e '.[dev]'
 
 # Configure .env
 cp .env.example .env
-# Edit .env and set OPENAI_API_KEY or ANTHROPIC_API_KEY
+# Edit .env and set GEMINI_API_KEY
 ```
 
 ---
@@ -124,13 +122,11 @@ The grading script will also test with scenarios you haven't seen.
 # Option A: conda
 conda activate ai-lab
 pip install -e '.[dev]'
-pip install langchain-openai  # or langchain-anthropic
 
 # Option B: venv
 python -m venv .venv
 source .venv/bin/activate
 pip install -e '.[dev]'
-pip install langchain-openai  # or langchain-anthropic
 
 # Configure LLM
 cp .env.example .env

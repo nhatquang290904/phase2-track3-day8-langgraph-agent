@@ -26,7 +26,7 @@ route (max retry)  -> retry -> dead_letter -> finalize -> END
    - `approval` — needed for HITL approval decisions
    - Decide which new fields should be append-only (`Annotated[list, add]`) vs overwrite
 
-2. **`llm.py`**: Review the LLM helper. Set up your `.env` with `OPENAI_API_KEY` or `ANTHROPIC_API_KEY`. Install `pip install langchain-openai` or `pip install langchain-anthropic`.
+2. **`llm.py`**: Review the Gemini-only LLM helper. Set up your `.env` with `GEMINI_API_KEY`. Gemini support is included in the project dependencies.
 
 3. **`nodes.py`**: Implement all node functions. Key requirements:
    - `classify_node`: **MUST use LLM** with structured output for intent classification

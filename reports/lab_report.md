@@ -1,54 +1,15 @@
-"""Report generation helper.
-
-TODO(student): implement report rendering using MetricsReport data
-and the template in reports/lab_report_template.md.
-"""
-
-from __future__ import annotations
-
-from pathlib import Path
-
-from .metrics import MetricsReport
-
-
-def render_report(metrics: MetricsReport) -> str:
-    """Render a complete lab report from metrics data.
-
-    TODO(student): Generate a report that includes:
-    1. Metrics summary table (total scenarios, success rate, retries, interrupts)
-    2. Per-scenario results table
-    3. Architecture explanation (your graph design, state schema, reducers)
-    4. Failure analysis (at least two failure modes you considered)
-    5. Improvement plan
-
-    Use reports/lab_report_template.md as your guide.
-
-    Return: formatted markdown string
-    """
-    scenario_rows = "\n".join(
-        "| {id} | {success} | {expected} | {actual} | {nodes} | {retries} | {approval} |".format(
-            id=item.scenario_id,
-            success="yes" if item.success else "no",
-            expected=item.expected_route,
-            actual=item.actual_route or "",
-            nodes=item.nodes_visited,
-            retries=item.retry_count,
-            approval="yes" if item.approval_observed else "no",
-        )
-        for item in metrics.scenario_metrics
-    )
-    return f"""# LangGraph Agent Lab Report
+# LangGraph Agent Lab Report
 
 ## Metrics Summary
 
 | Metric | Value |
 |---|---:|
-| Total scenarios | {metrics.total_scenarios} |
-| Success rate | {metrics.success_rate:.2%} |
-| Average nodes visited | {metrics.avg_nodes_visited:.2f} |
-| Total retries | {metrics.total_retries} |
-| Total interrupts/approvals | {metrics.total_interrupts} |
-| Resume success | {metrics.resume_success} |
+| Total scenarios | 7 |
+| Success rate | 100.00% |
+| Average nodes visited | 6.43 |
+| Total retries | 3 |
+| Total interrupts/approvals | 2 |
+| Resume success | True |
 
 ## Graph Architecture
 
@@ -91,7 +52,13 @@ complete event trail for grading and debugging.
 
 | Scenario | Success | Expected | Actual | Nodes | Retries | Approval observed |
 |---|---|---|---|---:|---:|---|
-{scenario_rows}
+| S01_simple | yes | simple | simple | 4 | 0 | no |
+| S02_tool | yes | tool | tool | 6 | 0 | no |
+| S03_missing | yes | missing_info | missing_info | 4 | 0 | no |
+| S04_risky | yes | risky | risky | 8 | 0 | yes |
+| S05_error | yes | error | error | 10 | 2 | no |
+| S06_delete | yes | risky | risky | 8 | 0 | yes |
+| S07_dead_letter | yes | error | error | 5 | 1 | no |
 
 ## LLM Integration
 
@@ -126,11 +93,3 @@ details before taking action.
 - Replace the mock tool with real support-system integrations.
 - Add LLM-as-judge evaluation for richer tool quality checks.
 - Add a small approval UI for real human-in-the-loop review.
-"""
-
-
-def write_report(metrics: MetricsReport, output_path: str | Path) -> None:
-    """Write the rendered report to a file."""
-    path = Path(output_path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(render_report(metrics), encoding="utf-8")
